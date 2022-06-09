@@ -6,7 +6,6 @@
  * @Last modified time: 2022-06-10T07:57:15+10:00
  */
 
-
 var newCreditSubTotal = 0.0;
 
 /**
