@@ -85,8 +85,8 @@ function beforeSubmit(type) {
       checkInvLineItem(record, type);
     }
 
-    // var applyFuelSurcharge = record.getFieldValue(
-    //   'custbody_apply_fuel_surcharge');
+    var applyFuelSurcharge = record.getFieldValue(
+      'custbody_apply_fuel_surcharge');
 
     var customerID = record.getFieldValue('entity');
     var customerRecord = nlapiLoadRecord('customer', customerID);
@@ -107,8 +107,8 @@ function beforeSubmit(type) {
 
     // nlapiLogExecution('DEBUG', 'applyFuelSurcharge', applyFuelSurcharge);
 
-    if (service_fuel_surcharge == 1 || mpex_surcharge == 1 || manual_surcharge ==
-      1 || fuel_surcharge == 1) {
+    if ((service_fuel_surcharge == 1 || mpex_surcharge == 1 || manual_surcharge ==
+      1 || fuel_surcharge == 1) && applyFuelSurcharge != 2) {
       var creditSubtotal = record.getFieldValue('subtotal');
       var invoiceId = record.getFieldValue('createdfrom');
       var rec = nlapiLoadRecord('invoice', invoiceId);
@@ -188,8 +188,8 @@ function beforeSubmit(type) {
       } else if ((isNullorEmpty(invtype) || invtype == 'NaN')) {
 
         nlapiLogExecution('DEBUG', 'service_fuel_surcharge',
-            service_fuel_surcharge)
-          //Applying Service Fuel Surcharge
+          service_fuel_surcharge)
+        //Applying Service Fuel Surcharge
         if (service_fuel_surcharge == '1' || service_fuel_surcharge == 1) {
 
           var surcharge_rate = 0;
@@ -265,10 +265,10 @@ function afterSubmit(type) {
     if (!isNullorEmpty(recId)) {
       var record = nlapiLoadRecord('creditmemo', recId);
       if (!isNullorEmpty(record) && record.getFieldValue(
-          'custbody_create_bill_credit') == 'T') {
+        'custbody_create_bill_credit') == 'T') {
         var custId = record.getFieldValue('entity');
         if (!checkCustomerIsFranchisee(custId) && !checkHeadOfficeCustomer(
-            custId) && !checkCompanyTerritory(custId)) {
+          custId) && !checkCompanyTerritory(custId)) {
           if (isNullorEmpty(record.getFieldValue('custbody_bill_credit'))) {
             billCredId = createBillCredit(record);
             if (!isNullorEmpty(billCredId)) {
@@ -291,10 +291,10 @@ function afterSubmit(type) {
     if (!isNullorEmpty(recId)) {
       var record = nlapiLoadRecord('creditmemo', recId);
       if (!isNullorEmpty(record) && record.getFieldValue(
-          'custbody_create_bill_credit') == 'T') {
+        'custbody_create_bill_credit') == 'T') {
         var custId = record.getFieldValue('entity');
         if (!checkCustomerIsFranchisee(custId) && !checkHeadOfficeCustomer(
-            custId) && !checkCompanyTerritory(custId)) {
+          custId) && !checkCompanyTerritory(custId)) {
           billCredId = createBillCredit(record, type);
           if (!isNullorEmpty(billCredId)) {
             record.setFieldValue('custbody_bill_credit', billCredId);
@@ -316,7 +316,7 @@ function createBillCredit(record) {
   //determine whether the franchisee is entitled to double commission on toll products (legacy)
   var productCommMultiplier = 1;
   if (nlapiLookupField('partner', record.getFieldValue('partner'),
-      'custentity_toll_double_commission') == "T") {
+    'custentity_toll_double_commission') == "T") {
     productCommMultiplier = 2;
   }
 
@@ -382,15 +382,15 @@ function createBillCredit(record) {
       calcAmt = parseFloat(bSearchResults[b].getValue('quantity')) * parseFloat(
         bSearchResults[b].getValue('custitem_commission_rate', 'item'));
     } else if (parseInt(bSearchResults[b].getValue('custitem_commission_model',
-        'item')) == 2) {
+      'item')) == 2) {
       calcAmt = parseFloat(bSearchResults[b].getValue('amount')) * parseFloat(
         bSearchResults[b].getValue('custitem_commission_rate', 'item')) / 100;
     } else if (parseInt(bSearchResults[b].getValue('custitem_commission_model',
-        'item')) == 5) {
+      'item')) == 5) {
       calcAmt = parseFloat(bSearchResults[b].getValue('amount')) * parseFloat(
         otherComRate) / 100;
     } else if (parseInt(bSearchResults[b].getValue('custitem_commission_model',
-        'item')) == 6) {
+      'item')) == 6) {
       calcAmt = parseFloat(bSearchResults[b].getValue('amount'));
     }
     if (bSearchResults[b].getValue('custitem_toll_double_commission', 'item') ==
@@ -430,7 +430,7 @@ function editBillCredit(record) {
     //determine whether the franchisee is entitled to double commission on toll products (legacy)
     var productCommMultiplier = 1;
     if (nlapiLookupField('partner', record.getFieldValue('partner'),
-        'custentity_toll_double_commission') == "T") {
+      'custentity_toll_double_commission') == "T") {
       productCommMultiplier = 2;
     }
 
@@ -507,21 +507,21 @@ function editBillCredit(record) {
         b].getValue('class', 'item'));
       var calcAmt = 0.00;
       if (parseInt(bSearchResults[b].getValue('custitem_commission_model',
-          'item')) == 1) {
+        'item')) == 1) {
         calcAmt = parseFloat(bSearchResults[b].getValue('quantity')) *
           parseFloat(bSearchResults[b].getValue('custitem_commission_rate',
             'item'));
       } else if (parseInt(bSearchResults[b].getValue(
-          'custitem_commission_model', 'item')) == 2) {
+        'custitem_commission_model', 'item')) == 2) {
         calcAmt = parseFloat(bSearchResults[b].getValue('amount')) * parseFloat(
-            bSearchResults[b].getValue('custitem_commission_rate', 'item')) /
+          bSearchResults[b].getValue('custitem_commission_rate', 'item')) /
           100;
       } else if (parseInt(bSearchResults[b].getValue(
-          'custitem_commission_model', 'item')) == 5) {
+        'custitem_commission_model', 'item')) == 5) {
         calcAmt = parseFloat(bSearchResults[b].getValue('amount')) * parseFloat(
           otherComRate) / 100;
       } else if (parseInt(bSearchResults[b].getValue(
-          'custitem_commission_model', 'item')) == 6) {
+        'custitem_commission_model', 'item')) == 6) {
         calcAmt = parseFloat(bSearchResults[b].getValue('amount'));
       }
       if (bSearchResults[b].getValue('custitem_toll_double_commission', 'item') ==
@@ -586,7 +586,7 @@ function checkHeadOfficeCustomer(custId) {
   if (isNullorEmpty(partner)) {
     return true;
   } else if (nlapiLookupField('partner', partner,
-      'custentity_company_territory') == "T") {
+    'custentity_company_territory') == "T") {
     return true;
   } else return false;
 }
@@ -594,7 +594,7 @@ function checkHeadOfficeCustomer(custId) {
 function checkCompanyTerritory(custId) {
   var partner = nlapiLookupField('customer', custId, 'partner');
   if (!isNullorEmpty(partner) && nlapiLookupField('partner', partner,
-      'custentity_company_territory') == "T") {
+    'custentity_company_territory') == "T") {
     return true;
   } else return false;
 }
