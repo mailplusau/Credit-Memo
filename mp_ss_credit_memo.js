@@ -82,7 +82,6 @@ function beforeSubmit(type) {
       var record = nlapiGetNewRecord();
     } else {
       var record = nlapiGetNewRecord();
-      checkInvLineItem(record, type);
     }
 
     var applyFuelSurcharge = record.getFieldValue(
@@ -104,6 +103,10 @@ function beforeSubmit(type) {
       'custentity_manual_surcharge');
     var fuel_surcharge = customerRecord.getFieldValue(
       'custentity_fuel_surcharge');
+
+    if (type != 'create') {
+      checkInvLineItem(record, type, customerID);
+    }
 
     // nlapiLogExecution('DEBUG', 'applyFuelSurcharge', applyFuelSurcharge);
 
@@ -230,22 +233,42 @@ function beforeSubmit(type) {
   }
 }
 
-function checkInvLineItem(rec, type) {
+function checkInvLineItem(rec, type, customerID) {
 
   var oldCreditSubototal = rec.getFieldValue('subtotal');
   var applyFuelSurcharge = rec.getFieldValue('custbody_apply_fuel_surcharge');
 
+  var customerRecord = nlapiLoadRecord('customer', customerID);
+
+  var service_fuel_surcharge = customerRecord.getFieldValue(
+    'custentity_service_fuel_surcharge');
+  var service_fuel_surcharge_rate = customerRecord.getFieldValue(
+    'custentity_service_fuel_surcharge_percen');
+
+  var mpex_surcharge = customerRecord.getFieldValue(
+    'custentity_mpex_surcharge');
+  var mpex_surcharge_rate = customerRecord.getFieldValue(
+    'custentity_mpex_surcharge_rate');
+  var manual_surcharge = customerRecord.getFieldValue(
+    'custentity_manual_surcharge');
+  var fuel_surcharge = customerRecord.getFieldValue(
+    'custentity_fuel_surcharge');
+
   for (n = 1; n <= rec.getLineItemCount('item'); n++) {
     var itemn = rec.getLineItemValue('item', 'item', n);
 
-    if (itemn == 9565 && nlapiGetContext().getExecutionContext() ==
-      'userinterface' && type ==
-      'edit') {
-      newCreditSubTotal = oldCreditSubototal - parseFloat(rec.getLineItemValue(
-        'item', 'rate', n))
-      nlapiLogExecution('DEBUG', 'remove fuel surcharge')
-      rec.removeLineItem('item', n);
+    if ((service_fuel_surcharge == 1 || mpex_surcharge == 1 || manual_surcharge ==
+      1 || fuel_surcharge == 1) && applyFuelSurcharge != 2) {
+      if (itemn == 9565 && nlapiGetContext().getExecutionContext() ==
+        'userinterface' && type ==
+        'edit') {
+        newCreditSubTotal = oldCreditSubototal - parseFloat(rec.getLineItemValue(
+          'item', 'rate', n))
+        nlapiLogExecution('DEBUG', 'remove fuel surcharge')
+        rec.removeLineItem('item', n);
+      }
     }
+
 
   }
 }
